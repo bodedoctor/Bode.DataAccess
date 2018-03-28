@@ -83,9 +83,9 @@ namespace Bode.DataAccess
 
         public IEnumerable<T> GetBy(string field, object value, string orderBy = null) => commandFactory.GetBy(field, value, orderBy).GetCollection(Build);
 
-        public void Delete(int id) => commandFactory.DeleteByPrimaryKey(id);
+        public void Delete(int id) => commandFactory.DeleteByPrimaryKey(id).ExecuteNonQuery();
 
-        public void Delete(string condition, object parameters = null) => commandFactory.DeleteWhere(condition, parameters);
+        public void Delete(string condition, object parameters = null) => commandFactory.DeleteWhere(condition, parameters).ExecuteNonQuery();
 
         public IEnumerable<T> Where(string condition, string orderBy = null, object parameters = null) => commandFactory.Where(condition, orderBy, parameters).GetCollection(Build);
 
