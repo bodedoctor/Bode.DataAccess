@@ -23,14 +23,14 @@ namespace Bode.DataAccess
 
         #region Constructors
 
-        public DataAccessRepository(string connectionString, Func<string, string> propToColConversion, string primaryKeyPropertyName)
+        public DataAccessRepository(string connectionString, string tableName, string primaryKeyPropertyName, Func<string, string> propToColConversion)
         {
             ConnectionString = connectionString;
-            Table = propToColConversion(typeof(T).Name);
+            Table = propToColConversion(tableName);
             Bindings = BindingCollection.Build<T>(
                 propToColConversion,
                 primaryKeyPropertyName,
-                new Dictionary<string, string> { { propToColConversion($"{typeof(T).Name}{primaryKeyPropertyName}"), primaryKeyPropertyName } }
+                new Dictionary<string, string> { { propToColConversion($"{tableName}{primaryKeyPropertyName}"), primaryKeyPropertyName } }
             );
         }
 

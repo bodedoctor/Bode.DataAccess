@@ -1,5 +1,5 @@
-﻿using MySql.Data.MySqlClient;
-using System.Data.Common;
+﻿using System.Data.Common;
+using MySql.Data.MySqlClient;
 
 namespace Bode.DataAccess.MySql
 {
