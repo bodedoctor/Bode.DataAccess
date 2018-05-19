@@ -83,7 +83,7 @@ namespace Bode.DataAccess
             {
                 _parameters = new Collection<DbParameter>();
             }
-            _parameters.Add(CreateDbParameter(name, value));
+            _parameters.Add(CreateDbParameter(name, value ?? DBNull.Value));
         }
 
         public void AddParameters(IEnumerable<KeyValuePair<string, object>> parameters)
