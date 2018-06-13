@@ -149,7 +149,8 @@ namespace Bode.DataAccess
                 var pi = newObj.GetType().GetProperty(reader.GetName(i), BindingFlags.SetProperty | BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (pi != null)
                 {
-                    pi.SetValue(newObj, reader[i]);
+                    var value = reader[i];
+                    pi.SetValue(newObj, value != DBNull.Value ? value : null);
                 }
             }
             return newObj;

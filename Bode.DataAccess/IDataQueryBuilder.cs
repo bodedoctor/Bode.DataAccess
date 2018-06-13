@@ -6,7 +6,7 @@ namespace Bode.DataAccess
     {
         string Select(string table, string condition = null, string orderBy = null);
 
-        string Insert(string table, IEnumerable<Binding> insertFields);
+        string Insert(string table, IEnumerable<Binding> insertFields, Binding primaryKey);
 
         string Update(string table, IEnumerable<Binding> updateFields, Binding primaryKey);
 

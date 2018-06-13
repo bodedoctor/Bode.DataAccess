@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Bode.DataAccess
 {
-    public abstract class DataAccessCommandFactory<T>
+    public abstract class DataAccessCommandFactory<T, TPrimaryKey>
     {
         #region Private Members
 
@@ -42,12 +42,12 @@ namespace Bode.DataAccess
             return command;
         }
 
-        public IDataAccessCommand GetByPrimaryKey(int id)
+        public IDataAccessCommand GetByPrimaryKey(TPrimaryKey id)
         {
             return GetBy(_bindings.PrimaryKey.ColumnName, id);
         }
 
-        public IDataAccessCommand GetByPrimaryKeys(int[] ids, string orderBy = null)
+        public IDataAccessCommand GetByPrimaryKeys(TPrimaryKey[] ids, string orderBy = null)
         {
             var command = CreateCommand(_connectionString);
             var paramList = new List<string>();
@@ -72,14 +72,14 @@ namespace Bode.DataAccess
             return command;
         }
 
-        public IDataAccessCommand DeleteByPrimaryKey(int id)
+        public IDataAccessCommand DeleteByPrimaryKey(TPrimaryKey id)
         {
             return DeleteBy(_bindings.PrimaryKey.ColumnName, id);
         }
 
-        public IDataAccessCommand Where(string condition, string orderBy = null, object parameters = null)
+        public IDataAccessCommand Where(string condition, object parameters = null, string orderBy = null)
         {
-            return Select(condition, orderBy, parameters);
+            return Select(condition, parameters, orderBy);
         }
 
         public IDataAccessCommand DeleteWhere(string condition, object parameters = null)
@@ -89,8 +89,8 @@ namespace Bode.DataAccess
 
         public IDataAccessCommand Upsert(T obj)
         {
-            var primaryKeyValue = obj.GetPropertyValue<int>(_bindings.PrimaryKey.PropertyName);
-            if (primaryKeyValue == 0)
+            var primaryKeyValue = obj.GetPropertyValue<TPrimaryKey>(_bindings.PrimaryKey.PropertyName);
+            if (primaryKeyValue.Equals(default(TPrimaryKey)))
                 return Insert(obj);
             return Update(obj);
         }
@@ -98,7 +98,7 @@ namespace Bode.DataAccess
         public IDataAccessCommand Insert(T obj)
         {
             var fields = _bindings.Bindings.Where(b => !b.IsPrimaryKey);
-            var query = _dataQueryBuilder.Insert(_table, _bindings.Bindings.Where(b => !b.IsPrimaryKey));
+            var query = _dataQueryBuilder.Insert(_table, _bindings.Bindings.Where(b => !b.IsPrimaryKey), _bindings.PrimaryKey);
             return CommandWithParameters(query, obj);
         }
 
@@ -129,7 +129,7 @@ namespace Bode.DataAccess
             return cmd;
         }
 
-        private IDataAccessCommand Select(string condition = null, string orderBy = null, object parameters = null)
+        private IDataAccessCommand Select(string condition = null, object parameters = null, string orderBy = null)
         {
             return CommandWithParameters(_dataQueryBuilder.Select(_table, condition, orderBy), parameters);
         }

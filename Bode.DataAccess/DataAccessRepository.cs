@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Bode.DataAccess
 {
-    public abstract class DataAccessRepository<T> where T : new()
+    public abstract class DataAccessRepository<T, TPrimaryKey> where T : new() where TPrimaryKey : struct
     {
         #region Public Properties
 
@@ -30,7 +30,7 @@ namespace Bode.DataAccess
             Bindings = BindingCollection.Build<T>(
                 propToColConversion,
                 primaryKeyPropertyName,
-                new Dictionary<string, string> { { propToColConversion($"{tableName}{primaryKeyPropertyName}"), primaryKeyPropertyName } }
+                new Dictionary<string, string> { { propToColConversion(primaryKeyPropertyName), primaryKeyPropertyName } }
             );
         }
 
@@ -38,9 +38,9 @@ namespace Bode.DataAccess
 
         #region Private Properties
 
-        private DataAccessCommandFactory<T> _commandFactory;
+        private DataAccessCommandFactory<T, TPrimaryKey> _commandFactory;
 
-        private DataAccessCommandFactory<T> commandFactory
+        private DataAccessCommandFactory<T, TPrimaryKey> commandFactory
         {
             get
             {
@@ -75,25 +75,25 @@ namespace Bode.DataAccess
 
         public IEnumerable<T> GetAll(string orderBy = null) => commandFactory.GetAll(orderBy).GetCollection(Build);
 
-        public T Get(int id) => commandFactory.GetByPrimaryKey(id).GetFirstOrDefault(Build);
+        public T Get(TPrimaryKey id) => commandFactory.GetByPrimaryKey(id).GetFirstOrDefault(Build);
 
-        public IEnumerable<T> Get(params int[] ids) => commandFactory.GetByPrimaryKeys(ids).GetCollection(Build);
+        public IEnumerable<T> Get(params TPrimaryKey[] ids) => commandFactory.GetByPrimaryKeys(ids).GetCollection(Build);
 
-        public IEnumerable<T> Get(int[] ids, string orderBy = null) => commandFactory.GetByPrimaryKeys(ids).GetCollection(Build);
+        public IEnumerable<T> Get(TPrimaryKey[] ids, string orderBy = null) => commandFactory.GetByPrimaryKeys(ids).GetCollection(Build);
 
         public IEnumerable<T> GetBy(string field, object value, string orderBy = null) => commandFactory.GetBy(field, value, orderBy).GetCollection(Build);
 
-        public void Delete(int id) => commandFactory.DeleteByPrimaryKey(id).ExecuteNonQuery();
+        public void Delete(TPrimaryKey id) => commandFactory.DeleteByPrimaryKey(id).ExecuteNonQuery();
 
         public void Delete(string condition, object parameters = null) => commandFactory.DeleteWhere(condition, parameters).ExecuteNonQuery();
 
-        public IEnumerable<T> Where(string condition, string orderBy = null, object parameters = null) => commandFactory.Where(condition, orderBy, parameters).GetCollection(Build);
+        public IEnumerable<T> Where(string condition, object parameters = null, string orderBy = null) => commandFactory.Where(condition, parameters, orderBy).GetCollection(Build);
 
-        public T FirstOrDefaultWhere(string condition, string orderBy = null, object parameters = null) => commandFactory.Where(condition, orderBy, parameters).GetFirstOrDefault(Build);
+        public T FirstOrDefaultWhere(string condition, object parameters = null, string orderBy = null) => commandFactory.Where(condition, parameters, orderBy).GetFirstOrDefault(Build);
 
         public void Save(T obj)
         {
-            obj.SetProperty(Bindings.PrimaryKey.PropertyName, commandFactory.Upsert(obj).GetScalar<int>());
+            obj.SetProperty(Bindings.PrimaryKey.PropertyName, commandFactory.Upsert(obj).GetScalar<TPrimaryKey>());
         }
 
         #endregion
@@ -136,7 +136,7 @@ namespace Bode.DataAccess
 
         #region Protected Abstract Methods
 
-        protected abstract DataAccessCommandFactory<T> CreateCommandFactory();
+        protected abstract DataAccessCommandFactory<T, TPrimaryKey> CreateCommandFactory();
 
         #endregion
     }
